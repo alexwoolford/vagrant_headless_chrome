@@ -1,0 +1,50 @@
+---
+# vagrantHeadlessBrowserPlaybook.yml
+- hosts: all
+  user: vagrant
+  sudo: True
+
+  tasks:
+
+    - name: add Google Chrome respository
+      lineinfile: dest=/etc/apt/sources.list line="deb http://dl.google.com/linux/chrome/deb/ stable main"
+
+    - name: add the Google linux key
+      apt_key: url=https://dl-ssl.google.com/linux/linux_signing_key.pub state=present
+
+    - name: install linux packages
+      action: apt update_cache=yes pkg={{item}} state=installed
+      with_items:
+        - python-pip
+        - python-dev
+        - vim
+        - zip
+        - xvfb
+        - google-chrome-stable
+
+    - name: install pip packages
+      pip: name={{item}} state=present
+      with_items:
+        - selenium
+
+    - name: download chromedriver
+      get_url: url=http://chromedriver.storage.googleapis.com/2.9/chromedriver_linux64.zip dest=/home/vagrant/chromedriver_linux64.zip mode=0440
+
+    - name: unzip chromedriver
+      shell: "unzip /home/vagrant/chromedriver_linux64.zip"
+
+    - name: move chromedriver to /usr/local/bin
+      shell: "sudo mv chromedriver /usr/local/bin"
+
+    - name: make chromdriver executable
+      shell: "chmod +x /usr/local/bin/chromedriver"
+
+    - name: copy the xvfb.conf file
+      copy: src=xvfb.conf dest=/etc/init/xvfb.conf owner=root group=root mode=644 backup=yes
+
+    - name: start the xvfb service
+      service: name=xvfb state=started
+
+    - name: add DISPLAY environment variable export to .bashrc
+      lineinfile: dest=/home/vagrant/.bashrc line="export DISPLAY=:99"
+
