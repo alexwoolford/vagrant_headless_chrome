@@ -6,7 +6,7 @@ Vagrantfile and Ansible playbook to setup an Ubuntu machine with a headless chro
     vagrant up
     vagrant ssh
 
-Then, to test that it's working:
+Then, to check that it's working:
 
     vagrant@precise64:~$ python
     Python 2.7.3 (default, Feb 27 2014, 19:58:35) 
